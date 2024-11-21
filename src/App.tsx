@@ -5,6 +5,7 @@ import './App.css';
 const App: React.FC = () => {
   const [digits, setDigits] = useState<string[]>(new Array(8).fill(''));
   const [lastDigit, setLastDigit] = useState<number | null>(null); 
+  const isInputFull = !(/^\d{8}$/.test(digits.join("")));
 
   const baseUrl: string = "http://localhost:3000";
 
@@ -12,7 +13,7 @@ const App: React.FC = () => {
     const newDigits = [...digits];
     const input = event.target.value;
 
-    if (input.match(/^\d$/)) {
+    if (RegExp(/^\d$/).exec(input)) {
       newDigits[index] = input;
       setDigits(newDigits);
 
@@ -32,7 +33,7 @@ const App: React.FC = () => {
     const newDigits = [...digits];
 
     pastedData.forEach((char, i) => {
-      (i < digits.length && char.match(/^\d$/)) && (newDigits[i] = char);
+      (i < digits.length && RegExp(/^\d$/).exec(char)) && (newDigits[i] = char);
     });
 
     setDigits(newDigits);
@@ -69,7 +70,7 @@ const App: React.FC = () => {
     return (await res.json()).lastDigit;
   };
 
-  const handleClick = async () => {
+  const handleCalculate = async () => {
     await fetch(`${baseUrl}/save`, {
       method: "POST",
       body: JSON.stringify({ "first8": `${digits.join("")}` }),
@@ -81,6 +82,11 @@ const App: React.FC = () => {
 
     setLastDigit(await getLastDigit());
   };
+
+  const handleClear = () => {
+    setDigits(new Array(8).fill(''));
+    lastDigit !== null && setLastDigit(null);
+  }
 
   return (
     <>
@@ -101,11 +107,19 @@ const App: React.FC = () => {
       <div className="card">
         <Button
           variant="contained"
-          disabled={!(/^[0-9]{8}$/.test(digits.join("")))}
-          sx={{ padding: "10px", fontWeight: "bold", backgroundColor: "#4d030f", color: "#fcdbe0" }}
-          onClick={handleClick}
+          disabled={isInputFull}
+          sx={{ padding: "10px", fontWeight: "bold", backgroundColor: "#4d030f", color: "#fcdbe0", marginRight: "20px" }}
+          onClick={handleCalculate}
         >
           Calculate
+        </Button>
+        <Button
+          variant="outlined"
+          disabled={!(/^\d.*$/.test(digits.join("")))}
+          sx={{ padding: "10px", fontWeight: "bold", color: "#4d030f", borderColor: "#4d030f"}}
+          onClick={handleClear}
+        >
+          Clear
         </Button>
       </div>
       {lastDigit !== null && (
