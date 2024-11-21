@@ -1,0 +1,20 @@
+#root {
+  width: 100vw;
+  height: 100vh;
+  max-width: 1280px;
+  margin: auto;
+  padding-top: 10%;
+  text-align: center;
+  color: rgb(77, 3, 15);
+  background-color: rgb(252, 219, 224);
+}
+
+.card {
+  margin-top: 30px;
+}
+
+#last-digit-text {
+  margin-top: 30px;
+  font-size: larger;
+  font-weight: bold;
+}
