@@ -1,123 +1,44 @@
-import { useState } from 'react';
+import { FC } from 'react';
 import { TextField, Box, Button } from '@mui/material';
 import './App.css';
+import useConsts from "./utils/consts"
+import { handleChange, handlePaste, handleKeyDown, handleCalculate, handleClear } from './utils/utils';
 
-const App: React.FC = () => {
-  const [digits, setDigits] = useState<string[]>(new Array(8).fill(''));
-  const [lastDigit, setLastDigit] = useState<number | null>(null); 
-  const isInputFull = !(/^\d{8}$/.test(digits.join("")));
-
-  const baseUrl: string = "http://localhost:3000";
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, index: number) => {
-    const newDigits = [...digits];
-    const input = event.target.value;
-
-    if (RegExp(/^\d$/).exec(input)) {
-      newDigits[index] = input;
-      setDigits(newDigits);
-
-      if (input && index < digits.length - 1) {
-        const nextInput = document.getElementById(`digit-${index + 1}`) as HTMLInputElement;
-        if (nextInput) {
-          nextInput.focus();
-        }
-      }
-    } else {
-      event.preventDefault();
-    }
-  };
-
-  const handlePaste = (event: React.ClipboardEvent<HTMLInputElement>) => {
-    const pastedData = event.clipboardData.getData('Text').split('');
-    const newDigits = [...digits];
-
-    pastedData.forEach((char, i) => {
-      (i < digits.length && RegExp(/^\d$/).exec(char)) && (newDigits[i] = char);
-    });
-
-    setDigits(newDigits);
-    event.preventDefault();
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>, index: number) => {
-    const newDigits = [...digits];
-    if (event.key === 'Backspace') {
-      if (digits[index] === '') {
-        if (index > 0) {
-          const prevInput = document.getElementById(`digit-${index - 1}`) as HTMLInputElement;
-          if (prevInput) {
-            prevInput.focus();
-          }
-        }
-      } else {
-        newDigits[index] = '';
-        setDigits(newDigits);
-      }
-    }
-  };
-
-  const getLastDigit = async () => {
-    const res = await fetch(`${baseUrl}/get`, {
-      method: "POST",
-      body: JSON.stringify({ "first8": `${digits.join("")}` }),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    });
-
-    return (await res.json()).lastDigit;
-  };
-
-  const handleCalculate = async () => {
-    await fetch(`${baseUrl}/save`, {
-      method: "POST",
-      body: JSON.stringify({ "first8": `${digits.join("")}` }),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    });
-
-    setLastDigit(await getLastDigit());
-  };
-
-  const handleClear = () => {
-    setDigits(new Array(8).fill(''));
-    lastDigit !== null && setLastDigit(null);
-  }
+const App: FC = () => {
+  const { digits, setDigits, lastDigit, setLastDigit, isInputFull, isInputValid, baseUrl } = useConsts();
 
   return (
     <>
       <h1>What is my 9th digit?</h1>
-      <Box display="flex" justifyContent="center" alignItems="center" width="100%">
+      <Box className="top">
         {digits.map((digit, index) => (
           <TextField
+            className="input-box"
             key={index}
             id={`digit-${index}`}
             value={digit}
-            onChange={(e) => handleChange(e, index)}
-            onPaste={handlePaste}
-            onKeyDown={(e) => handleKeyDown(e, index)}
-            sx={{ margin: '0 8px', width: '40px' }}
+            onChange={(e) => handleChange(e, index, digits, setDigits)}
+            onPaste={(e) => handlePaste(e, digits, setDigits)}
+            onKeyDown={(e) => handleKeyDown(e, index, digits, setDigits)}
           />
         ))}
       </Box>
       <div className="card">
         <Button
+          id="calculate-btn"
           variant="contained"
           disabled={isInputFull}
-          sx={{ padding: "10px", fontWeight: "bold", backgroundColor: "#4d030f", color: "#fcdbe0", marginRight: "20px" }}
-          onClick={handleCalculate}
+          onClick={() => handleCalculate(baseUrl, digits, setLastDigit)}
+          sx={{backgroundColor: "#4d030f", color: "#fcdbe0"}}
         >
           Calculate
         </Button>
         <Button
+          id="clear-btn"
           variant="outlined"
-          disabled={!(/^\d.*$/.test(digits.join("")))}
-          sx={{ padding: "10px", fontWeight: "bold", color: "#4d030f", borderColor: "#4d030f"}}
-          onClick={handleClear}
+          disabled={isInputValid}
+          onClick={() => handleClear(setDigits, lastDigit, setLastDigit)}
+          sx={{color: "#4d030f", borderColor: "#4d030f"}}
         >
           Clear
         </Button>
