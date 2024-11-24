@@ -52,16 +52,18 @@ const getLastDigit = async (baseUrl: string, digits: string[]) => {
 };
 
 const handleCalculate = async (baseUrl: string, digits: string[], setLastDigit: React.Dispatch<React.SetStateAction<number | null>>) => {
+  const lastDigit: number = await getLastDigit(baseUrl, digits);
+  
   await fetch(`${baseUrl}/save`, {
     method: "POST",
-    body: JSON.stringify({ "first8": `${digits.join("")}` }),
+    body: JSON.stringify({ "first8": `${digits.join("")}`, "lastDigit": lastDigit }),
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     }
   });
 
-  setLastDigit(await getLastDigit(baseUrl, digits));
+  setLastDigit(lastDigit);
 };
 
 const handleClear = (setDigits: Dispatch<React.SetStateAction<string[]>>, lastDigit: number | null, setLastDigit: React.Dispatch<React.SetStateAction<number | null>>) => {
