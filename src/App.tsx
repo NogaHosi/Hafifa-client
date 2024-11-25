@@ -1,11 +1,12 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { TextField, Box, Button } from '@mui/material';
 import './App.css';
-import useConsts from "./utils/consts"
-import { handleChange, handlePaste, handleKeyDown, handleCalculate, handleClear } from './utils/utils';
+import BASE_URL from "./utils/consts"
+import { handleChange, handlePaste, handleKeyDown, handleCalculate, handleClear, isInputFull, isInputValid } from './utils/utils';
 
 const App: FC = () => {
-  const { digits, setDigits, lastDigit, setLastDigit, isInputFull, isInputValid, baseUrl } = useConsts();
+  const [digits, setDigits] = useState<string[]>(new Array(8).fill(''));
+  const [lastDigit, setLastDigit] = useState<number | null>(null);
 
   return (
     <>
@@ -14,7 +15,7 @@ const App: FC = () => {
         {digits.map((digit, index) => (
           <TextField
             className="input-box"
-            key={index}
+            key={`digit-${index}`}
             id={`digit-${index}`}
             value={digit}
             onChange={(e) => handleChange(e, index, digits, setDigits)}
@@ -27,8 +28,8 @@ const App: FC = () => {
         <Button
           id="calculate-btn"
           variant="contained"
-          disabled={isInputFull}
-          onClick={() => handleCalculate(baseUrl, digits, setLastDigit)}
+          disabled={isInputFull(digits)}
+          onClick={() => handleCalculate(BASE_URL, digits, setLastDigit)}
           sx={{backgroundColor: "#4d030f", color: "#fcdbe0"}}
         >
           Calculate
@@ -36,7 +37,7 @@ const App: FC = () => {
         <Button
           id="clear-btn"
           variant="outlined"
-          disabled={isInputValid}
+          disabled={isInputValid(digits)}
           onClick={() => handleClear(setDigits, lastDigit, setLastDigit)}
           sx={{color: "#4d030f", borderColor: "#4d030f"}}
         >
