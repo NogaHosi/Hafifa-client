@@ -18,3 +18,26 @@
   font-size: larger;
   font-weight: bold;
 }
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 30%;
+  margin: auto;
+}
+
+.input-box {
+  width: 40px;
+}
+
+#calculate-btn {
+  padding: 10px;
+  font-weight: bold;
+  margin-right: 20px;
+}
+
+#clear-btn {
+  padding: 10px;
+  font-weight: bold;
+}
